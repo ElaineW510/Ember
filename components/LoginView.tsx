@@ -50,7 +50,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onSwitchToSignUp, onSucces
           Welcome back to <span className="text-sage-500 italic tracking-wide">Ember</span>
         </h1>
         <p className="text-lg text-sage-600 mb-8 font-sans leading-relaxed">
-          Sign in to continue your journey of personal growth
+          where every spark of growth is preserved 🎇
         </p>
       </div>
 
