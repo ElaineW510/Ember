@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 interface SignUpViewProps {
   onSwitchToLogin: () => void;
-  onSuccess: () => void;
+  onSuccess: (email?: string) => void;
 }
 
 export const SignUpView: React.FC<SignUpViewProps> = ({ onSwitchToLogin, onSuccess }) => {
@@ -35,11 +35,9 @@ export const SignUpView: React.FC<SignUpViewProps> = ({ onSwitchToLogin, onSucce
         return result;
       }
       
-      // Success - check if user is actually authenticated (has session)
-      // If email confirmation is required, user might not be logged in yet
-      // The auth state listener will handle redirect when session is established
-      // For now, try to redirect - if user isn't authenticated, they'll be redirected back to login
-      onSuccess();
+      // Success - if email is returned, user needs to verify email
+      // Otherwise, they're already authenticated
+      onSuccess(result.email);
       
       return result;
     } catch (err: any) {

@@ -78,6 +78,18 @@ npm install
 - Verify your Supabase URL and anon key are correct
 - Check the browser console for detailed error messages
 
+### Email Verification Setup
+1. In Supabase Dashboard, go to **Authentication** → **Settings**
+2. Under **Email Auth**, make sure:
+   - **Enable email confirmations** is **ON** (required for email verification flow)
+   - **Secure email change** is enabled (recommended)
+3. Under **Email Templates**, customize the **Confirm signup** template:
+   - Update the email subject and body to match Ember's brand
+   - The verification link will automatically redirect to your app
+   - Make sure the redirect URL matches your app's domain
+4. The verification email will be sent automatically when users sign up
+5. Users must click the verification link in their email before they can access the app
+
 ## Security Notes
 
 - The `anon` key is safe to use in client-side code (it's public)
