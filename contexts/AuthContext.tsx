@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { authService } from '../services/authService';
+import { clearEncryptionKey } from '../services/encryptionService';
 
 interface AuthContextType {
   user: User | null;
@@ -98,6 +99,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const signOut = async () => {
     try {
+      // Clear encryption key before signing out
+      if (user?.id) {
+        clearEncryptionKey(user.id);
+      }
       await authService.signOut();
       setUser(null);
     } catch (err) {
