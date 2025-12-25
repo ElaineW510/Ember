@@ -88,23 +88,5 @@ export const authService = {
       callback(session?.user ?? null);
     });
   },
-
-  /**
-   * Resend verification email
-   */
-  resendVerificationEmail: async (email: string): Promise<{ error: AuthError | null }> => {
-    const { error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email,
-    });
-    return { error };
-  },
-
-  /**
-   * Check if user's email is verified
-   */
-  isEmailVerified: (user: User | null): boolean => {
-    return user?.email_confirmed_at !== null && user?.email_confirmed_at !== undefined;
-  },
 };
 

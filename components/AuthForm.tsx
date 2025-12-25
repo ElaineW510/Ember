@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { EyeIcon, EyeOffIcon } from '../constants';
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -11,6 +12,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, onSwitchMode
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -79,16 +82,31 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, onSwitchMode
         <label htmlFor="password" className="block text-sm font-medium text-sage-700 mb-2">
           Password
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition text-sage-900"
-          placeholder="••••••••"
-          disabled={isLoading}
-          autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-        />
+        <div className="relative">
+          <input
+            id="password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 pr-12 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition text-sage-900"
+            placeholder="••••••••"
+            disabled={isLoading}
+            autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-sage-400 hover:text-sage-600 transition-colors focus:outline-none"
+            tabIndex={-1}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? (
+              <EyeOffIcon className="w-5 h-5" />
+            ) : (
+              <EyeIcon className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {mode === 'signup' && (
@@ -96,16 +114,31 @@ export const AuthForm: React.FC<AuthFormProps> = ({ mode, onSubmit, onSwitchMode
           <label htmlFor="confirmPassword" className="block text-sm font-medium text-sage-700 mb-2">
             Confirm Password
           </label>
-          <input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition text-sage-900"
-            placeholder="••••••••"
-            disabled={isLoading}
-            autoComplete="new-password"
-          />
+          <div className="relative">
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-3 pr-12 border border-sage-200 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-sage-200 focus:border-sage-400 transition text-sage-900"
+              placeholder="••••••••"
+              disabled={isLoading}
+              autoComplete="new-password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sage-400 hover:text-sage-600 transition-colors focus:outline-none"
+              tabIndex={-1}
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+            >
+              {showConfirmPassword ? (
+                <EyeOffIcon className="w-5 h-5" />
+              ) : (
+                <EyeIcon className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
       )}
 

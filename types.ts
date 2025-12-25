@@ -12,7 +12,6 @@ export interface JournalEntry {
 export enum AppView {
   LOGIN = 'LOGIN',
   SIGNUP = 'SIGNUP',
-  VERIFY_EMAIL = 'VERIFY_EMAIL',
   HOME = 'HOME',
   PROCESSING = 'PROCESSING',
   RESULT = 'RESULT',

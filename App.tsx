@@ -9,39 +9,17 @@ import { JournalList } from './components/JournalList';
 import { PrivacyNotice } from './components/PrivacyNotice';
 import { LoginView } from './components/LoginView';
 import { SignUpView } from './components/SignUpView';
-import { VerifyEmailView } from './components/VerifyEmailView';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { authService } from './services/authService';
 import { BookIcon, PlayIcon, SAMPLE_TRANSCRIPT } from './constants';
 
 function AppContent() {
-  const { user, loading: authLoading, signOut, isEmailVerified, checkEmailVerification } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const [view, setView] = useState<AppView>(AppView.LOGIN);
   const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
   const [currentEntry, setCurrentEntry] = useState<JournalEntry | null>(null);
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [entriesLoading, setEntriesLoading] = useState(false);
-  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
-
-  // Check for email verification in URL (when user clicks verification link)
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const type = urlParams.get('type');
-    const token = urlParams.get('token');
-    
-    if (type === 'signup' && token) {
-      // User clicked verification link - check if they're now verified
-      checkEmailVerification().then((verified) => {
-        if (verified) {
-          setView(AppView.HOME);
-          setPendingVerificationEmail(null);
-          // Clean up URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      });
-    }
-  }, [checkEmailVerification]);
 
   // Handle auth state changes
   useEffect(() => {
@@ -51,26 +29,16 @@ function AppContent() {
 
     if (!user) {
       // User is not authenticated - redirect to login unless already on auth pages
-      if (view !== AppView.LOGIN && view !== AppView.SIGNUP && view !== AppView.VERIFY_EMAIL) {
+      if (view !== AppView.LOGIN && view !== AppView.SIGNUP) {
         setView(AppView.LOGIN);
       }
     } else {
-      // User is authenticated - check if email is verified
-      if (!isEmailVerified && view !== AppView.VERIFY_EMAIL) {
-        // User needs to verify email - show verification screen
-        if (user.email) {
-          setPendingVerificationEmail(user.email);
-          setView(AppView.VERIFY_EMAIL);
-        }
-      } else if (isEmailVerified) {
-        // Email is verified - redirect from auth pages to home
-        if (view === AppView.LOGIN || view === AppView.SIGNUP || view === AppView.VERIFY_EMAIL) {
-          setView(AppView.HOME);
-          setPendingVerificationEmail(null);
-        }
+      // User is authenticated - redirect from auth pages to home
+      if (view === AppView.LOGIN || view === AppView.SIGNUP) {
+        setView(AppView.HOME);
       }
     }
-  }, [user, authLoading, view, isEmailVerified, checkEmailVerification]);
+  }, [user, authLoading, view]);
 
   // Load entries when authenticated and view changes
   useEffect(() => {
@@ -100,24 +68,6 @@ function AppContent() {
       return;
     }
 
-    // Check if email is verified
-    if (!isEmailVerified) {
-      setError("Please verify your email before uploading files.");
-      if (user.email) {
-        setPendingVerificationEmail(user.email);
-        setView(AppView.VERIFY_EMAIL);
-      }
-      return;
-    }
-
-    // Verify we have an active session before proceeding
-    const session = await authService.getSession();
-    if (!session?.user) {
-      setError("Your session has expired. Please sign in again.");
-      setView(AppView.LOGIN);
-      return;
-    }
-
     setView(AppView.PROCESSING);
     setStatus(ProcessStatus.UPLOADING);
     setError(null);
@@ -140,15 +90,8 @@ function AppContent() {
 
     } catch (err: any) {
       console.error(err);
-      const errorMessage = err.message || "Something went wrong processing your file.";
-      // If it's an authentication error, redirect to login
-      if (errorMessage.includes('not authenticated') || errorMessage.includes('User not authenticated')) {
-        setError("Your session has expired. Please sign in again.");
-        setView(AppView.LOGIN);
-      } else {
-        setError(errorMessage);
-        setView(AppView.HOME);
-      }
+      setError(err.message || "Something went wrong processing your file.");
+      setView(AppView.HOME);
       setStatus(ProcessStatus.IDLE);
     }
   };
@@ -228,29 +171,11 @@ function AppContent() {
         return (
           <SignUpView
             onSwitchToLogin={() => setView(AppView.LOGIN)}
-            onSuccess={(email) => {
-              // If email is provided, user needs to verify
-              if (email) {
-                setPendingVerificationEmail(email);
-                setView(AppView.VERIFY_EMAIL);
-              } else if (user && isEmailVerified) {
-                // User is already verified, go to home
+            onSuccess={() => {
+              // The auth state change will handle the redirect
+              // But we can also set it here as a fallback
+              if (user) {
                 setView(AppView.HOME);
-              }
-            }}
-          />
-        );
-
-      case AppView.VERIFY_EMAIL:
-        return (
-          <VerifyEmailView
-            email={pendingVerificationEmail || user?.email || ''}
-            onVerified={async () => {
-              // Check verification status
-              const verified = await checkEmailVerification();
-              if (verified) {
-                setView(AppView.HOME);
-                setPendingVerificationEmail(null);
               }
             }}
           />
